@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Albert Kouchere GUIDZAVAI | Mathematical Modeling & Dynamical Systems</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00d4ff;
+            --secondary: #0099ff;
+            --accent: #ff6b35;
+            --dark: #0a0e27;
+            --darker: #050816;
+            --light: #f8f9fa;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --gradient: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            overflow-x: hidden;
+            background: var(--darker);
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        #particle-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 212, 255, 0.1);
+            z-index: 1000;
+            transition: all 0.3s;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .navbar.scrolled {
+            padding: 0.5rem 2rem;
+            background: rgba(10, 14, 39, 0.95);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #e0e0e0;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease 0.2s both;
+            color: #b0b0b0;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .about-text p {
+            margin-bottom: 1rem;
+            color: #b0b0b0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            transition: all 0.3s;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .research-areas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .research-card {
+            padding: 2rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .research-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.3);
+            border-color: var(--primary);
+        }
+
+        .research-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .research-card p {
+            color: #b0b0b0;
+        }
+
+        .publications {
+            background: transparent;
+        }
+
+        .publication-item {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .publication-item:hover {
+            box-shadow: 0 5px 25px rgba(0, 212, 255, 0.2);
+            transform: translateX(5px);
+            border-left-color: var(--primary);
+        }
+
+        .publication-item h4 {
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+        }
+
+        .publication-item p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .publication-item a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-bottom: 1px solid transparent;
+        }
+
+        .publication-item a:hover {
+            color: var(--secondary);
+            border-bottom-color: var(--secondary);
+        }
+
+        .contact {
+            background: transparent;
+        }
+
+        .contact h2 {
+            color: white;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .contact-item {
+            text-align: center;
+            padding: 2rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            transition: all 0.3s;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .contact-item:hover {
+            background: rgba(15, 23, 42, 0.95);
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .contact-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-item a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .contact-item a:hover {
+            color: var(--secondary);
+        }
+
+        .contact-item h3 {
+            color: #e0e0e0;
+        }
+
+        .contact-item p {
+            color: #b0b0b0;
+        }
+
+        footer {
+            background: rgba(5, 8, 22, 0.95);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        .scroll-indicator::after {
+            content: '↓';
+            color: var(--primary);
+            font-size: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="canvas-container">
+        <canvas id="particle-canvas"></canvas>
+    </div>
+
+    <div class="content-wrapper">
+        <nav class="navbar" id="navbar">
+            <div class="nav-container">
+                <div class="logo">AG</div>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#research">Research</a></li>
+                    <li><a href="#publications">Publications</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <h1>Dr. Albert Kouchere GUIDZAVAI</h1>
+                <p class="subtitle">Research Lecturer in Mathematics, Modelling and Dynamical Systems</p>
+                <p style="opacity: 0.7; margin-bottom: 2rem;">Faculty of Science | University of Yaoundé I, Cameroon</p>
+                <div class="hero-buttons">
+                    <a href="#research" class="btn btn-primary">Explore Research</a>
+                    <a href="#contact" class="btn btn-outline">Get in Touch</a>
+                </div>
+            </div>
+            <div class="scroll-indicator"></div>
+        </section>
+
+        <section id="about">
+            <h2>About Me</h2>
+            <div class="about-grid">
+                <div class="about-text">
+                    <p>I am a Research Lecturer in Applied Mathematics at the University of Yaoundé I, specializing in
+                        mathematical modelling with prediction through dynamical systems theory, chaos theory, and
+                        bifurcation theory.</p>
+                    <p>My research spans from asymptotic analysis of ordinary and partial differential equations to
+                        coupled systems modeling problems in epidemiology and ecosystems. Currently exploring stochastic
+                        approaches and fractional order derivatives in mathematical modeling.</p>
+                    <p>Born on January 16, 1989, I hold a Ph.D. in Applied Mathematics from the University of Maroua
+                        (2022) with First Class Honours, focusing on the mathematical modeling and control of
+                        vector-borne diseases.</p>
+                </div>
+                <div>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-number">7+</div>
+                            <p>Publications</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">10+</div>
+                            <p>Years Teaching</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">5+</div>
+                            <p>Universities</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="research">
+            <h2>Research Areas</h2>
+            <div class="research-areas">
+                <div class="research-card">
+                    <h3>🔬 Mathematical Modelling</h3>
+                    <p>Developing predictive models using dynamical systems theory, chaos theory, and bifurcation
+                        analysis with applications to real-world problems.</p>
+                </div>
+                <div class="research-card">
+                    <h3>🦟 Epidemiology</h3>
+                    <p>Mathematical modeling of vector-borne diseases including COVID-19, dengue, and chikungunya, with
+                        optimal control strategies.</p>
+                </div>
+                <div class="research-card">
+                    <h3>🌍 Ecosystem Dynamics</h3>
+                    <p>Coupled systems modeling predator-prey relationships and ecological interactions using
+                        differential equations.</p>
+                </div>
+                <div class="research-card">
+                    <h3>⚡ Electrical Oscillators</h3>
+                    <p>Asymptotic analysis of ODEs with applications to electrical systems, including stability and
+                        strange attractors.</p>
+                </div>
+                <div class="research-card">
+                    <h3>📊 Stochastic Methods</h3>
+                    <p>Incorporating stochastic approaches and fractional order derivatives in mathematical modeling for
+                        enhanced prediction.</p>
+                </div>
+                <div class="research-card">
+                    <h3>🎯 Optimal Control</h3>
+                    <p>Developing control strategies for disease prevention and management through vaccination and
+                        intervention policies.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="publications" class="publications">
+            <h2>Publications</h2>
+            <div class="publication-item">
+                <h4>Mathematical modeling of SARS-CoV-2 (COVID-19) pandemic in Cameroon accounting the role of boosted
+                    immune systems</h4>
+                <p>Kouchéré Guidzavaï, A., Yangla, J., Abboubakar, H., Kaakréo, G., Fandio, R., & Damakoa, I. (2026).
+                    MJ Mathematics and Computer Science, 2(1), 1-32.
+                    <a href="https://doi.org/10.63156/mjmcs02" target="_blank">DOI: 10.63156/mjmcs02</a>
+                </p>
+            </div>
+            <div class="publication-item">
+                <h4>Mathematical study of a model with a density-dependent contact rate</h4>
+                <p>Kouakep Tchaptchie, Y., Wellot, Y.A.S., Guidzavai, A.K. (2025).
+                    International Journal of Applied Mathematics, Volume 38 No. 10s. ISSN: 1311-1728 (print); ISSN:
+                    1314-8060 (online).
+                    <a href="https://ijamjournal.org/ijam/publication/index.php/ijam/article/download/1004/923/2041"
+                        target="_blank">View Article</a>
+                </p>
+            </div>
+            <div class="publication-item">
+                <h4>Fractional dynamics of a two-strain dengue model with co-infections and saturated incidences</h4>
+                <p>Abboubakar, H., Guidzavai, A.K., Gouroudja, S.A.B., Yankoulo, R., Mouangue, R. (2024).
+                    International Journal of Biomathematics, World Scientific.
+                    <a href="https://www.worldscientific.com/doi/abs/10.1142/S179352452450102X" target="_blank">DOI:
+                        10.1142/S179352452450102X</a> |
+                    <a href="https://www.researchgate.net/publication/383199560_Fractional_dynamics_of_a_two-strain_dengue_model_with_co-infections_and_saturated_incidences"
+                        target="_blank">ResearchGate</a>
+                </p>
+            </div>
+            <div class="publication-item">
+                <h4>Analysis of a mosquito life cycle model</h4>
+                <p>Guidzavaï, A.K., Abboubakar, H., Damakoa, I. (2021).
+                    Revue Africaine de la Recherche en Informatique et Mathématiques Appliquées, Volume 34-2020-Special
+                    Issue CARI 2020, INRIA.
+                    <a href="https://doi.org/10.46298/arima.6697" target="_blank">DOI: 10.46298/arima.6697</a> |
+                    <a href="https://hal.science/hal-02912007/" target="_blank">HAL</a>
+                </p>
+            </div>
+            <div class="publication-item">
+                <h4>Mathematical modeling and projections of a vector-borne disease with optimal control strategies: A
+                    case study of the Chikungunya in Chad</h4>
+                <p>Abboubakar, H., Guidzavaï, A.K., Yangla, J., Damakoa, I., Mouangue, R. (2021).
+                    Chaos, Solitons and Fractals, Volume 150, 111197, Elsevier.
+                    <a href="https://www.sciencedirect.com/science/article/abs/pii/S0960077921005518"
+                        target="_blank">ScienceDirect</a>
+                </p>
+            </div>
+            <div class="publication-item">
+                <h4>A Note on Proportionate Mixing Assumption Revisited for a Model with Vertical Transmission</h4>
+                <p>Kouakep Tchaptchie, Y., Houpa D.D.E., Nguelbe, A., Guidzavai K.A. (2015).
+                    Biomath, Volume 4 No. 1, Article ID: 1504081.
+                    <a href="https://biomath.math.bas.bg/biomath/index.php/biomath/article/view/j.biomath.2015.04.081"
+                        target="_blank">View Article</a> |
+                    <a href="https://biomath.math.bas.bg/biomath/index.php/biomath/article/view/j.biomath.2015.04.081/pdf"
+                        target="_blank">PDF</a>
+                </p>
+            </div>
+            <div class="publication-item">
+                <h4>Minimum vaccination coverage inducing global immunization under vertical transmission assumption
+                </h4>
+                <p>Kouakep Tchaptchie, Y., Houpa D.D.E., Nguelbe, A., Guidzavai K.A. (2014).
+                    GIRAGA XV Conference Proceedings.
+                </p>
+            </div>
+        </section>
+
+        <section id="contact" class="contact">
+            <h2>Contact Information</h2>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <div class="contact-icon">📧</div>
+                    <h3>Email</h3>
+                    <a href="mailto:albert.guidzavai@univ-yaounde1.cm">albert.guidzavai@univ-yaounde1.cm</a>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">📱</div>
+                    <h3>WhatsApp</h3>
+                    <a href="https://wa.me/237679261678">+237 679 261 678</a>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">🏛️</div>
+                    <h3>Office</h3>
+                    <p>Faculty of Science<br>University of Yaoundé I<br>P.O. Box 812, Cameroon</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Dr. Albert Kouchere GUIDZAVAI. All rights reserved.</p>
+            <p>Research Lecturer | University of Yaoundé I | P.O. Box 812, Cameroon</p>
+        </footer>
+    </div>
+
+    <script>
+        // Particle Network Simulation
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const particleCount = 100;
+        const maxDistance = 150;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2 + 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 212, 255, 0.6)';
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function connectParticles() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < maxDistance) {
+                        const opacity = (1 - distance / maxDistance) * 0.3;
+                        ctx.strokeStyle = `rgba(0, 212, 255, ${opacity})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(5, 8, 22, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            connectParticles();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Mouse interaction
+        let mouse = { x: null, y: null };
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+
+            particles.forEach(particle => {
+                const dx = mouse.x - particle.x;
+                const dy = mouse.y - particle.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 100) {
+                    particle.vx += dx * 0.0001;
+                    particle.vy += dy * 0.0001;
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.research-card, .publication-item, .stat-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+
+</html>
